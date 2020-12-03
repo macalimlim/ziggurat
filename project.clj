@@ -1,4 +1,8 @@
-(defproject tech.gojek/ziggurat "3.6.2"
+(require 'cemerick.pomegranate.aether)
+(cemerick.pomegranate.aether/register-wagon-factory!
+ "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+
+(defproject tech.gojek/ziggurat "3.6.2-log-metadata"
   :description "A stream processing framework to build stateless applications on kafka"
   :url "https://github.com/gojektech/ziggurat"
   :license {:name "Apache License, Version 2.0"
@@ -49,11 +53,14 @@
                                com.fasterxml.jackson.core/jackson-core
                                com.fasterxml.jackson.dataformat/jackson-dataformat-smile
                                com.fasterxml.jackson.dataformat/jackson-dataformat-cbor]]
-                 [metosin/ring-swagger-ui "3.25.3"]]
+                 [metosin/ring-swagger-ui "3.25.3"]
+                 [com.gojek.esb/esb-log-entities "6.902.0"]]
   :deploy-repositories [["clojars" {:url           "https://clojars.org/repo"
                                     :username      :env/clojars_username
                                     :password      :env/clojars_password
                                     :sign-releases false}]]
+  :repositories {"Go-jek"     "http://artifactory-gojek.golabs.io/artifactory/gojek-release-local"
+                 "Gojek-Libs" "http://artifactory-gojek.golabs.io/artifactory/libs-release-local"}
   :pedantic? :warn
   :java-source-paths ["src/com"]
   :aliases {"test-all"      ["with-profile" "default:+1.8:+1.9" "test"]
@@ -69,7 +76,8 @@
                                       [org.apache.kafka/kafka-streams "2.3.0" :classifier "test" :exclusions [org.slf4j/slf4j-log4j12 log4j]]
                                       [org.apache.kafka/kafka-clients "2.3.0" :classifier "test"]
                                       [org.apache.kafka/kafka_2.11 "2.3.0" :classifier "test"]
-                                      [org.clojure/test.check "0.10.0"]]
+                                      [org.clojure/test.check "0.10.0"]
+                                      [com.gojek.esb/esb-log-entities "6.902.0"]]
                        :plugins      [[lein-cloverage "1.0.13" :exclusions [org.clojure/clojure]]]
                        :repositories [["confluent-repo" "https://packages.confluent.io/maven/"]]}
              :dev     {:plugins [[lein-ancient "0.6.15"]
