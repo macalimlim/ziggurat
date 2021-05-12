@@ -16,11 +16,9 @@
            [java.time Duration]
            [java.util Properties]
            [java.util.regex Pattern]
-           [org.apache.kafka.common.serialization Serdes]
-           [org.apache.kafka.common.utils SystemTime]
+           [org.apache.kafka.common.errors TimeoutException]
            [org.apache.kafka.streams KafkaStreams KafkaStreams$State StreamsConfig StreamsBuilder Topology]
            [org.apache.kafka.streams.kstream JoinWindows ValueMapper TransformerSupplier ValueJoiner ValueTransformerSupplier]
-           [org.apache.kafka.streams.state.internals KeyValueStoreBuilder RocksDbKeyValueBytesStoreSupplier]
            [ziggurat.timestamp_transformer IngestionTimeExtractor]))
 
 (def default-config-for-stream
@@ -284,3 +282,26 @@
              (start-streams (:stream-routes (mount/args)) (ziggurat-config)))
   :stop (do (log/info "Stopping Kafka streams")
             (stop-streams stream)))
+
+(defn add-stream-thread
+  [stream]
+  (let [opt (.addStreamThread stream)
+        v   (.orElse opt "Stream thread not created, it can only be created either its in the REBALANCING or RUNNING state")]
+    (log/infof "%s" v)))
+
+(defn remove-stream-thread
+  ([stream]
+   (let [opt (.removeStreamThread stream)
+         v   (.orElse opt "Stream thread cannot be removed")]
+     (log/infof "%s" v)))
+  ([stream timeout-ms]
+   (try
+     (let [opt (.removeStreamThread stream (Duration/ofMillis timeout-ms))
+           v   (.orElse opt "Stream thread cannot be removed")]
+       (log/infof "%s" v))
+     (catch TimeoutException e
+       (log/infof "%s" (.getMessage e))))))
+
+(defn get-stream-thread-count
+  [stream]
+  (.size (.localThreadsMetadata stream)))
